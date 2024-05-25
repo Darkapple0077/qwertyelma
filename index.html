@@ -60,7 +60,7 @@
             text-align: center;
             border-radius: 25px; /* Oval hale getirmek için eklenen stil */
         }
-        #playButton, #tutorialButton, #languageButton, #fullscreenButtonContainer, #menuButton, #resumeButton, #backButton, #soundToggleButton {
+        #playButton, #tutorialButton, #languageButton, #fullscreenButton, #menuButton, #resumeButton, #backButton, #soundToggleButton {
             padding: 15px 30px;
             font-size: 24px;
             cursor: pointer;
@@ -261,8 +261,7 @@
         <button id="tutorialButton">Eğitim</button>
         <button id="soundToggleButton">Ses: Açık</button>
         <div id="fullscreenButtonContainer">
-            <label for="fullscreenCheckbox">Tam Ekran</label>
-            <input type="checkbox" id="fullscreenCheckbox">
+            <button id="fullscreenButton">Tam Ekran</button>
         </div>
         <div id="controlsInfo">
             <p>Kontroller:</p>
@@ -331,7 +330,7 @@
         const ctx = canvas.getContext('2d');
         const playButton = document.getElementById('playButton');
         const tutorialButton = document.getElementById('tutorialButton');
-        const fullscreenCheckbox = document.getElementById('fullscreenCheckbox');
+        const fullscreenButton = document.getElementById('fullscreenButton');
         const languageButton = document.getElementById('languageButton');
         const languageMenu = document.getElementById('languageMenu');
         const closeLanguageMenu = document.getElementById('closeLanguageMenu');
@@ -393,6 +392,7 @@
 
         playButton.addEventListener('click', startGame);
         tutorialButton.addEventListener('click', showTutorial);
+        fullscreenButton.addEventListener('click', toggleFullscreen);
         languageButton.addEventListener('click', () => {
             languageMenu.style.display = 'flex';
         });
@@ -686,7 +686,6 @@
         function startGame() {
             menu.style.display = 'none';
             gameContainer.style.display = 'flex';
-            document.documentElement.requestFullscreen(); // Fullscreen başlat
             resetGame();
             countdown();
             playBackgroundMusic();
@@ -851,6 +850,16 @@
             eatSound.volume = volume;
             gameOverSound.volume = volume;
             highScoreSound.volume = volume;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         }
 
         // Ses seviyesini başlangıçta %50'ye ayarla
