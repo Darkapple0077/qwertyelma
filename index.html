@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meyve YILANI</title>
+    <style>
+        /* Stil ayarları */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #0000ff; /* Oyun dışı ekran arka planı */
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+        }
+        #menu, #gameContainer, #tutorialContainer {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 5px solid #fff; /* Daha kalın çerçeve */
+            background-color: #add8e6; /* Oyun ekranının arka planı */
+        }
+        .info {
+            width: 510px;
+            display: flex;
+            justify-content: space-between;
+            color: #FFF;
+            margin-bottom: 10px;
+            font-family: "Changa one", sans-serif;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 25px; /* Oval hale getirmek için eklenen stil */
+        }
+        #playButton, #tutorialButton, #languageButton, #fullscreenButtonContainer, #menuButton, #resumeButton, #backButton, #soundToggleButton {
+            padding: 15px 30px;
+            font-size: 24px;
+            cursor: pointer;
+            margin: 10px;
+            background-color: #fff;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 10px;
+        }
+        #controlsInfo {
+            text-align: left;
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+        }
+        #fullscreenButtonContainer {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        #fullscreenCheckbox {
+            margin-left: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        #languageMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border: 1px solid #000;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+        }
+        #menuButton {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: #fff;
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 25px;
+            border: 1px solid #000;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #pauseMenu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border: 1px solid #000;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+        }
+        #highScores {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        #lives {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+            text-align: left;
+            position: absolute;
+            top: 10px;
+            left: 0;
+            margin-left: 10px;
+        }
+        #countdown {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 48px;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        #fruitInfo {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+            text-align: left;
+            position: absolute;
+            top: 80px;
+            left: 0;
+            margin-left: 10px;
+        }
+        #fruitInfoBonus {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+            text-align: left;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+        #gameTitle {
+            color: #FFD700;
+            font-family: "Changa one", sans-serif;
+            font-size: 32px;
+            text-align: center;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-shadow: 2px 2px 4px #000;
+        }
+        #gameOverText {
+            display: none;
+            color: red;
+            font-family: "Changa one", sans-serif;
+            font-size: 48px;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 2px 2px 4px #000;
+        }
+        #gameOverPopup {
+            display: none;
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: "Changa one", sans-serif;
+        }
+        #restartButtonPopup, #menuButtonPopup {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #fff;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        #websiteFooter {
+            color: #FFF;
+            font-family: "Changa one", sans-serif;
+            font-size: 18px;
+            text-align: center;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+        }
+        #websiteHeader {
+            color: #FFD700;
+            font-family: "Changa one", sans-serif;
+            font-size: 32px;
+            text-align: center;
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-shadow: 2px 2px 4px #000;
+        }
+    </style>
+</head>
+<body>
+    <div id="websiteHeader">www.qwertyelma.com</div>
+    <div id="nicknameModal" class="modal">
+        <div class="modal-content">
+            <h3>Nicknamenizi girin:</h3>
+            <input type="text" id="nicknameInput" placeholder="Nickname">
+            <button onclick="saveNickname()">Kaydet</button>
+        </div>
+    </div>
+    <div id="menu">
+        <button id="playButton">Oyna</button>
+        <button id="tutorialButton">Eğitim</button>
+        <button id="soundToggleButton">Ses: Açık</button>
+        <div id="fullscreenButtonContainer">
+            <label for="fullscreenCheckbox">Tam Ekran</label>
+            <input type="checkbox" id="fullscreenCheckbox">
+        </div>
+        <div id="controlsInfo">
+            <p>Kontroller:</p>
+            <ul>
+                <li>Yön Tuşları: Hareket</li>
+                <li>Boşluk: Duraklat</li>
+            </ul>
+        </div>
+        <button id="languageButton">Diller</button>
+        <div id="languageMenu">
+            <h3>Diller</h3>
+            <label><input type="radio" name="language" value="en"> English</label>
+            <label><input type="radio" name="language" value="tr"> Türkçe</label>
+            <label><input type="radio" name="language" value="fr"> Français</label>
+            <label><input type="radio" name="language" value="de"> Deutsch</label>
+            <label><input type="radio" name="language" value="zh"> 中文</label>
+            <button id="closeLanguageMenu">Kapat</button>
+        </div>
+    </div>
+    <div id="gameContainer">
+        <div class="info">
+            <div id="score">Skor: 0</div>
+            <div id="highScore">En Yüksek: 0</div>
+        </div>
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="highScores"></div>
+        <div id="countdown">3</div>
+        <div id="fruitInfo">
+            <p>🍒 Kiraz:<br>1 puan</p>
+            <p>🍌 Muz:<br>2 puan</p>
+            <p>🍎 Elma:<br>3 puan</p>
+        </div>
+        <div id="fruitInfoBonus">
+            <p>"BONUS" (10 saniye)</p>
+            <p>🍍 Ananas:<br>6 puan</p>
+            <p>🍇 Üzüm:<br>5 puan</p>
+        </div>
+        <div id="gameOverText">OYUN BİTTİ</div>
+        <div id="gameOverPopup">
+            <button id="restartButtonPopup" onclick="restartGame()">Yeniden Başlat</button>
+            <button id="menuButtonPopup" onclick="goToMenu()">Ana Menü</button>
+        </div>
+        <div id="websiteFooter">www.qwertyelma.com</div>
+    </div>
+    <div id="tutorialContainer">
+        <h2 id="tutorialWelcome">Yılan Zamanına Hoşgeldiniz!</h2>
+        <p id="tutorialInstructions1">Yılanı hareket ettirmek için yön tuşlarını kullanın.</p>
+        <p id="tutorialInstructions2">Büyümek ve puan kazanmak için meyveleri yiyin.</p>
+        <p id="tutorialInstructions3">Duvarlara ve kendinize çarpmaktan kaçının.</p>
+        <button id="backButton">Menüye Dön</button>
+    </div>
+    <button id="menuButton" onclick="goToMenu()">Menü</button>
+    <div id="pauseMenu">
+        <button id="resumeButton" onclick="resumeGame()">Devam Et</button>
+        <button onclick="goToMenu()">Menü</button>
+    </div>
+    <!-- Ses dosyaları -->
+    <audio id="eatSound" src="eat.mp3" preload="auto"></audio>
+    <audio id="gameOverSound" src="gameover.mp3" preload="auto"></audio>
+    <audio id="highScoreSound" src="highscore.mp3" preload="auto"></audio>
+    <audio id="bgMusic1" src="bgMusic1.mp3" preload="auto" loop></audio>
+    <audio id="bgMusic2" src="bgMusic2.mp3" preload="auto" loop></audio>
+    <audio id="bgMusic3" src="bgMusic3.mp3" preload="auto" loop></audio>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playButton = document.getElementById('playButton');
+        const tutorialButton = document.getElementById('tutorialButton');
+        const fullscreenCheckbox = document.getElementById('fullscreenCheckbox');
+        const languageButton = document.getElementById('languageButton');
+        const languageMenu = document.getElementById('languageMenu');
+        const closeLanguageMenu = document.getElementById('closeLanguageMenu');
+        const menu = document.getElementById('menu');
+        const gameContainer = document.getElementById('gameContainer');
+        const tutorialContainer = document.getElementById('tutorialContainer');
+        const controlsInfo = document.getElementById('controlsInfo');
+        const menuButton = document.getElementById('menuButton');
+        const pauseMenu = document.getElementById('pauseMenu');
+        const resumeButton = document.getElementById('resumeButton');
+        const highScoresDiv = document.getElementById('highScores');
+        const countdownDiv = document.getElementById('countdown');
+        const fruitInfoDiv = document.getElementById('fruitInfo');
+        const fruitInfoBonusDiv = document.getElementById('fruitInfoBonus');
+        const nicknameModal = document.getElementById('nicknameModal');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const backButton = document.getElementById('backButton');
+        const soundToggleButton = document.getElementById('soundToggleButton');
+        const gameOverText = document.getElementById('gameOverText');
+        const gameOverPopup = document.getElementById('gameOverPopup');
+
+        const tutorialWelcome = document.getElementById('tutorialWelcome');
+        const tutorialInstructions1 = document.getElementById('tutorialInstructions1');
+        const tutorialInstructions2 = document.getElementById('tutorialInstructions2');
+        const tutorialInstructions3 = document.getElementById('tutorialInstructions3');
+
+        const eatSound = document.getElementById('eatSound');
+        const gameOverSound = document.getElementById('gameOverSound');
+        const highScoreSound = document.getElementById('highScoreSound');
+        const bgMusic1 = document.getElementById('bgMusic1');
+        const bgMusic2 = document.getElementById('bgMusic2');
+        const bgMusic3 = document.getElementById('bgMusic3');
+
+        const box = 24; // 25x25 kare oluşturmak için boyutu küçülttüm
+        const rows = 25;
+        const cols = 25;
+        let snake = [];
+        let food;
+        let bonusFood = null;
+        let score;
+        let highScore = localStorage.getItem('highScore') || 0;
+        let highScoreName = localStorage.getItem('highScoreName') || 'Player';
+        let d;
+        let speed = 180; // Başlangıç hızı
+        let isPaused;
+        let game;
+        let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+        let nickname = localStorage.getItem('nickname') || '';
+        let isGameOver = false; // Oyun bitiş durumu
+        let bgMusicIndex = 0;
+        let isSoundOn = true;
+        let language = 'tr'; // Varsayılan dil
+        let speedInterval; // Hız artışı için zamanlayıcı
+
+        const snakeSkins = ["#228B22", "#32CD32", "#006400", "#8B4513", "#FFD700", "#FF4500"];
+
+        document.getElementById('highScore').innerHTML = `En Yüksek: ${highScore}`;
+        document.addEventListener("keydown", direction);
+
+        playButton.addEventListener('click', startGame);
+        tutorialButton.addEventListener('click', showTutorial);
+        languageButton.addEventListener('click', () => {
+            languageMenu.style.display = 'flex';
+        });
+        closeLanguageMenu.addEventListener('click', () => {
+            languageMenu.style.display = 'none';
+        });
+        backButton.addEventListener('click', () => {
+            tutorialContainer.style.display = 'none';
+            menu.style.display = 'flex';
+        });
+        document.querySelectorAll('input[name="language"]').forEach((radio) => {
+            radio.addEventListener('change', changeLanguage);
+        });
+        soundToggleButton.addEventListener('click', toggleSound);
+
+        if (!nickname) {
+            nicknameModal.style.display = 'flex';
+        }
+
+        function saveNickname() {
+            nickname = nicknameInput.value.trim();
+            if (nickname) {
+                localStorage.setItem('nickname', nickname);
+                nicknameModal.style.display = 'none';
+            }
+        }
+
+        function direction(event) {
+            if (isGameOver && event.keyCode === 13) { // Enter tuşu
+                restartGame();
+                return;
+            }
+
+            if (isGameOver) return; // Oyun bitmişse hareket etme
+
+            if (event.keyCode == 37 && d != "RIGHT") {
+                d = "LEFT";
+            } else if (event.keyCode == 38 && d != "DOWN") {
+                d = "UP";
+            } else if (event.keyCode == 39 && d != "LEFT") {
+                d = "RIGHT";
+            } else if (event.keyCode == 40 && d != "UP") {
+                d = "DOWN";
+            } else if (event.keyCode == 32) { // Boşluk tuşu
+                if (isGameOver) return; // Oyun bitmişse pause yapma
+                isPaused = !isPaused;
+                if (isPaused) {
+                    clearInterval(game);
+                    pauseMenu.style.display = 'flex';
+                } else {
+                    pauseMenu.style.display = 'none';
+                    game = setInterval(draw, speed);
+                }
+            }
+        }
+
+        function collision(head, array) {
+            for (let i = 0; i < array.length; i++) {
+                if (head.x == array[i].x && head.y == array[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function drawSnakePart(x, y, part, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(x, y, box, box, 5);
+            ctx.fill();
+            ctx.strokeStyle = "#006400";
+            ctx.stroke();
+                
+            // Eyes for the head
+            if (part === 'head') {
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(x + box / 4, y + box / 4, box / 8, 0, Math.PI * 2, true); // Left eye
+                ctx.arc(x + 3 * box / 4, y + box / 4, box / 8, 0, Math.PI * 2, true); // Right eye
+                ctx.fill();
+        
+                // Pupils
+                ctx.fillStyle = "#000";
+                ctx.beginPath();
+                ctx.arc(x + box / 4, y + box / 4, box / 16, 0, Math.PI * 2, true); // Left pupil
+                ctx.arc(x + 3 * box / 4, y + box / 4, box / 16, 0, Math.PI * 2, true); // Right pupil
+                ctx.fill();
+        
+                // Mouth
+                ctx.fillStyle = "#000";
+                ctx.fillRect(x + box / 3, y + 2 * box / 3, box / 3, box / 16); // Mouth
+            }
+        }
+
+        function drawFood(x, y, type) {
+            ctx.font = `${box}px Arial`;
+            ctx.textAlign = "center";
+            if (type === 'cherry') {
+                ctx.fillText('🍒', x + box / 2, y + box / 1.2);
+            } else if (type === 'banana') {
+                ctx.fillText('🍌', x + box / 2, y + box / 1.2);
+            } else if (type === 'apple') {
+                ctx.fillText('🍎', x + box / 2, y + box / 1.2);
+            } else if (type === 'pineapple') {
+                ctx.fillText('🍍', x + box / 2, y + box / 1.2);
+            } else if (type === 'grapes') {
+                ctx.fillText('🍇', x + box / 2, y + box / 1.2);
+            }
+        }
+
+        function drawExplosion(x, y) {
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(x + box / 2, y + box / 2, box, 0, Math.PI * 2, true);
+            ctx.fill();
+        
+            ctx.fillStyle = 'orange';
+            ctx.beginPath();
+            ctx.arc(x + box / 2, y + box / 2, box / 2, 0, Math.PI * 2, true);
+            ctx.fill();
+        
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.arc(x + box / 2, y + box / 2, box / 4, 0, Math.PI * 2, true);
+            ctx.fill();
+        }
+
+        function draw() {
+            if (isPaused) {
+                return;
+            }
+
+            ctx.fillStyle = "#add8e6"; /* Oyun ekranının arka planı */
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let snakeColor = snakeSkins[Math.floor(score / 15) % snakeSkins.length];
+
+            // Draw the snake parts
+            drawSnakePart(snake[0].x, snake[0].y, 'head', snakeColor);
+            for (let i = 1; i < snake.length; i++) {
+                drawSnakePart(snake[i].x, snake[i].y, 'body', snakeColor);
+            }
+
+            drawFood(food.x, food.y, food.type);
+            if (bonusFood) {
+                drawFood(bonusFood.x, bonusFood.y, bonusFood.type);
+            }
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if (d == "LEFT") snakeX -= box;
+            if (d == "UP") snakeY -= box;
+            if (d == "RIGHT") snakeX += box;
+            if (d == "DOWN") snakeY += box;
+
+            if (snakeX == food.x && snakeY == food.y) {
+                if (isSoundOn) eatSound.play(); // Yemek yenildiğinde ses çal
+                if (food.type === 'cherry') {
+                    score++;
+                } else if (food.type === 'banana') {
+                    score += 2;
+                } else if (food.type === 'apple') {
+                    score += 3;
+                }
+
+                document.getElementById('score').innerHTML = `Skor: ${score}`;
+                food = generateRandomFood();
+
+                // Büyüme animasyonu
+                for (let i = 0; i < score - snake.length + 1; i++) {
+                    snake.push({});
+                }
+
+            } else {
+                snake.pop();
+            }
+
+            let newHead = {
+                x: snakeX,
+                y: snakeY
+            };
+
+            if (bonusFood && snakeX == bonusFood.x && snakeY == bonusFood.y) {
+                if (isSoundOn) eatSound.play(); // Yemek yenildiğinde ses çal
+                if (bonusFood.type === 'grapes') {
+                    score += 5;
+                } else if (bonusFood.type === 'pineapple') {
+                    score += 6;
+                }
+                document.getElementById('score').innerHTML = `Skor: ${score}`;
+                bonusFood = null;
+
+                // Büyüme animasyonu
+                for (let i = 0; i < score - snake.length + 1; i++) {
+                    snake.push({});
+                }
+            }
+
+            if (bonusFood && bonusFood.timeout > 0) {
+                bonusFood.timeout--;
+            } else {
+                bonusFood = null;
+            }
+
+            if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                isGameOver = true; // Oyun bitti olarak işaretle
+                clearInterval(speedInterval); // Hız artışı zamanlayıcısını durdur
+                updateHighScores();
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreName = nickname; // Kaydedilen nickname'i kullanıyoruz
+                    saveHighScore();
+                    if (isSoundOn) highScoreSound.play(); // Yeni yüksek skor yapıldığında ses çal
+                } else {
+                    if (isSoundOn) gameOverSound.play(); // Oyun bittiğinde ses çal
+                }
+                // Patlama efekti
+                for (let i = 0; i < snake.length; i++) {
+                    setTimeout(() => {
+                        drawExplosion(snake[i].x, snake[i].y);
+                    }, i * 50); // Her bir yılan parçası için patlama efekti
+                }
+                setTimeout(() => {
+                    gameOverText.style.display = 'block';
+                    gameOverPopup.style.display = 'block';
+                }, 3000); // 3 saniye sonra game over metni ve popup göster
+                return;
+            }
+
+            snake.unshift(newHead);
+
+            if (score % 10 === 0 && score !== 0 && !bonusFood) {
+                if (Math.random() < 0.5) {
+                    bonusFood = generateRandomBonusFood();
+                    setTimeout(() => {
+                        bonusFood = null;
+                    }, 10000); // 10 saniye sonra bonus meyveyi kaldır
+                }
+            }
+        }
+
+        function generateRandomFood() {
+            let position;
+            do {
+                position = {
+                    x: Math.floor(Math.random() * cols) * box,
+                    y: Math.floor(Math.random() * rows) * box,
+                    type: getRandomFoodType()
+                };
+            } while (collision(position, snake)); // Yılanın işgal ettiği karede değilse
+            return position;
+        }
+
+        function getRandomFoodType() {
+            const rand = Math.random();
+            if (rand < 0.05) {
+                return 'apple';
+            } else if (rand < 0.15) {
+                return 'banana';
+            } else {
+                return 'cherry';
+            }
+        }
+
+        function generateRandomBonusFood() {
+            let position;
+            do {
+                position = {
+                    x: Math.floor(Math.random() * cols) * box,
+                    y: Math.floor(Math.random() * rows) * box,
+                    type: Math.random() < 0.5 ? 'pineapple' : 'grapes',
+                    timeout: 150
+                };
+            } while (collision(position, snake)); // Yılanın işgal ettiği karede değilse
+            return position;
+        }
+
+        function saveHighScore() {
+            highScores.push({ name: highScoreName, score: highScore });
+            highScores.sort((a, b) => b.score - a.score);
+            if (highScores.length > 10) {
+                highScores.pop();
+            }
+            localStorage.setItem('highScores', JSON.stringify(highScores));
+            document.getElementById('highScore').innerHTML = `En Yüksek: ${highScore}`;
+            updateHighScores();
+        }
+
+        function startGame() {
+            menu.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            document.documentElement.requestFullscreen(); // Fullscreen başlat
+            resetGame();
+            countdown();
+            playBackgroundMusic();
+        }
+
+        function playBackgroundMusic() {
+            bgMusic1.pause();
+            bgMusic2.pause();
+            bgMusic3.pause();
+            if (bgMusicIndex === 0) {
+                bgMusic1.play();
+            } else if (bgMusicIndex === 1) {
+                bgMusic2.play();
+            } else if (bgMusicIndex === 2) {
+                bgMusic3.play();
+            }
+            bgMusicIndex = (bgMusicIndex + 1) % 3;
+        }
+
+        function showTutorial() {
+            menu.style.display = 'none';
+            tutorialContainer.style.display = 'flex';
+        }
+
+        function changeLanguage() {
+            language = document.querySelector('input[name="language"]:checked').value;
+            updateLanguage();
+            languageMenu.style.display = 'none';
+        }
+
+        function updateLanguage() {
+            if (language === 'en') {
+                playButton.innerText = 'Play';
+                tutorialButton.innerText = 'Tutorial';
+                controlsInfo.innerHTML = '<p>Controls:</p><ul><li>Arrow Keys: Move</li><li>Space: Pause</li></ul>';
+                tutorialWelcome.innerText = 'Welcome to Snake Time!';
+                tutorialInstructions1.innerText = 'Use the arrow keys to move the snake.';
+                tutorialInstructions2.innerText = 'Eat the fruits to grow and earn points.';
+                tutorialInstructions3.innerText = 'Avoid hitting the walls and yourself.';
+                backButton.innerText = 'Back to Menu';
+                languageButton.innerText = 'Languages';
+                soundToggleButton.innerText = 'Sound: On';
+                document.getElementById('score').innerHTML = `Score: ${score}`;
+                document.getElementById('highScore').innerHTML = `High: ${highScore}`;
+                document.getElementById('countdown').innerText = '3';
+                document.getElementById('gameOverText').innerText = 'GAME OVER';
+                document.getElementById('restartButtonPopup').innerText = 'Restart';
+                document.getElementById('menuButtonPopup').innerText = 'Menu';
+                fruitInfoDiv.innerHTML = `
+                    <p>🍒 Cherry:<br>1 point</p>
+                    <p>🍌 Banana:<br>2 points</p>
+                    <p>🍎 Apple:<br>3 points</p>
+                `;
+                fruitInfoBonusDiv.innerHTML = `
+                    <p>"BONUS" (10 sec.)</p>
+                    <p>🍍 Pineapple:<br>6 points</p>
+                    <p>🍇 Grapes:<br>5 points</p>
+                `;
+                highScoresDiv.innerHTML = `<h3>High Scores</h3>${highScores.slice(0, 10).map((score, index) => `<p>${index + 1}. ${score.name}: ${score.score}</p>`).join('')}`;
+            } else if (language === 'tr') {
+                playButton.innerText = 'Oyna';
+                tutorialButton.innerText = 'Eğitim';
+                controlsInfo.innerHTML = '<p>Kontroller:</p><ul><li>Yön Tuşları: Hareket</li><li>Boşluk: Duraklat</li></ul>';
+                tutorialWelcome.innerText = 'Yılan Zamanına Hoşgeldiniz!';
+                tutorialInstructions1.innerText = 'Yılanı hareket ettirmek için yön tuşlarını kullanın.';
+                tutorialInstructions2.innerText = 'Büyümek ve puan kazanmak için meyveleri yiyin.';
+                tutorialInstructions3.innerText = 'Duvarlara ve kendinize çarpmaktan kaçının.';
+                backButton.innerText = 'Menüye Dön';
+                languageButton.innerText = 'Diller';
+                soundToggleButton.innerText = 'Ses: Açık';
+                document.getElementById('score').innerHTML = `Skor: ${score}`;
+                document.getElementById('highScore').innerHTML = `En Yüksek: ${highScore}`;
+                document.getElementById('countdown').innerText = '3';
+                document.getElementById('gameOverText').innerText = 'OYUN BİTTİ';
+                document.getElementById('restartButtonPopup').innerText = 'Yeniden Başlat';
+                document.getElementById('menuButtonPopup').innerText = 'Ana Menü';
+                fruitInfoDiv.innerHTML = `
+                    <p>🍒 Kiraz:<br>1 puan</p>
+                    <p>🍌 Muz:<br>2 puan</p>
+                    <p>🍎 Elma:<br>3 puan</p>
+                `;
+                fruitInfoBonusDiv.innerHTML = `
+                    <p>"BONUS" (10 saniye)</p>
+                    <p>🍍 Ananas:<br>6 puan</p>
+                    <p>🍇 Üzüm:<br>5 puan</p>
+                `;
+                highScoresDiv.innerHTML = `<h3>Yüksek Skorlar</h3>${highScores.slice(0, 10).map((score, index) => `<p>${index + 1}. ${score.name}: ${score.score}</p>`).join('')}`;
+            }
+        }
+
+        function resetGame() {
+            snake = [];
+            snake[0] = { x: 12 * box, y: 12 * box }; // Orta noktada başlat
+            food = generateRandomFood();
+            bonusFood = null;
+            score = 0;
+            d = null;
+            speed = 180; // Başlangıç hızı
+            isPaused = false;
+            isGameOver = false; // Oyun bitiş durumunu sıfırla
+            document.getElementById('score').innerHTML = `Skor: ${score}`;
+            menuButton.style.display = 'none';
+            pauseMenu.style.display = 'none';
+            gameOverText.style.display = 'none';
+            gameOverPopup.style.display = 'none';
+            updateHighScores();
+        }
+
+        function updateHighScores() {
+            highScoresDiv.innerHTML = `<h3>Yüksek Skorlar</h3>${highScores.slice(0, 10).map((score, index) => `<p>${index + 1}. ${score.name}: ${score.score}</p>`).join('')}`;
+        }
+
+        function restartGame() {
+            clearInterval(game);
+            resetGame();
+            countdown();
+            playBackgroundMusic();
+        }
+
+        function goToMenu() {
+            clearInterval(game);
+            resetGame();
+            gameContainer.style.display = 'none';
+            menu.style.display = 'flex';
+            document.exitFullscreen(); // Fullscreen çık
+            bgMusic1.pause();
+            bgMusic2.pause();
+            bgMusic3.pause();
+        }
+
+        function resumeGame() {
+            if (isGameOver) return; // Oyun bitmişse devam ettirme
+            isPaused = false;
+            pauseMenu.style.display = 'none';
+            game = setInterval(draw, speed);
+        }
+
+        function countdown() {
+            let count = 3;
+            countdownDiv.innerText = count;
+            countdownDiv.style.display = 'block';
+
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownDiv.innerText = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownDiv.style.display = 'none';
+                    game = setInterval(draw, speed);
+                }
+            }, 1000);
+        }
+
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+            soundToggleButton.innerText = isSoundOn ? 'Ses: Açık' : 'Ses: Kapalı';
+            const volume = isSoundOn ? 0.5 : 0;
+            bgMusic1.volume = volume;
+            bgMusic2.volume = volume;
+            bgMusic3.volume = volume;
+            eatSound.volume = volume;
+            gameOverSound.volume = volume;
+            highScoreSound.volume = volume;
+        }
+
+        // Ses seviyesini başlangıçta %50'ye ayarla
+        bgMusic1.volume = 0.5;
+        bgMusic2.volume = 0.5;
+        bgMusic3.volume = 0.5;
+        eatSound.volume = 1.0;
+        gameOverSound.volume = 1.0;
+        highScoreSound.volume = 1.0;
+
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.beginPath();
+            this.moveTo(x + r, y);
+            this.arcTo(x + w, y, x + w, y + h, r);
+            this.arcTo(x + w, y + h, x, y + h, r);
+            this.arcTo(x, y + h, x, y, r);
+            this.closePath();
+            return this;
+        }
+
+        window.onload = updateLanguage; // Sayfa yüklendiğinde dil güncellemesini yap
+    </script>
+</body>
+</html>
